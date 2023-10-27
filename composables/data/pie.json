@@ -1,0 +1,28 @@
+[
+  { "id": 0, "type": 1, "value": 0.9, "name": "铅系统能耗评分" },
+  { "id": 0, "type": 1, "value": 0.73, "name": "锌系统能耗评分" },
+  {
+    "id": 0,
+    "type": 2,
+    "data": [
+      { "value": 335, "name": "粗铅" },
+      { "value": 310, "name": "综合回收" },
+      { "value": 1247, "name": "电解厂" },
+      { "value": 135, "name": "制液" },
+      { "value": 154, "name": "焙烧" },
+      { "value": 124, "name": "动力" },
+      { "value": 48, "name": "水处理" }
+    ]
+  },
+  {
+    "id": 0,
+    "type": 2,
+    "data": [
+      { "value": 335, "name": "天然气" },
+      { "value": 310, "name": "压缩空气" },
+      { "value": 234, "name": "氧气" },
+      { "value": 135, "name": "水" },
+      { "value": 1548, "name": "电" }
+    ]
+  }
+]
