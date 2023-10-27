@@ -6,8 +6,8 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@unocss/nuxt',
     '@pinia/nuxt',
-    '@nuxtjs/color-mode',
     '@vite-pwa/nuxt',
+    '@nuxt/ui',
   ],
 
   experimental: {
@@ -15,17 +15,13 @@ export default defineNuxtConfig({
     // but missing on offline, disabling extraction it until fixed
     payloadExtraction: false,
     inlineSSRStyles: false,
-    renderJsonPayloads: true,
+    renderJsonPayloads: false,
     typedPages: true,
   },
 
   css: [
     '@unocss/reset/tailwind.css',
   ],
-
-  colorMode: {
-    classSuffix: '',
-  },
 
   nitro: {
     esbuild: {
@@ -58,7 +54,18 @@ export default defineNuxtConfig({
 
   pwa,
 
+  colorMode: {
+    preference: 'dark',
+  },
+
   devtools: {
     enabled: true,
   },
+
+  build: {
+    transpile: [/echarts/, /zrender/],
+  },
+
+  routeRules: { '/': { ssr: false } },
+
 })

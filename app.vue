@@ -18,10 +18,7 @@ html, body , #__nuxt{
   height: 100vh;
   margin: 0;
   padding: 0;
-}
-
-html.dark {
-  background: #222;
-  color: white;
+  overflow:hidden;
+  background-image: url(/bg.png);
 }
 </style>

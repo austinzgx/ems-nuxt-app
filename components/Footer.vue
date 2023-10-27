@@ -1,7 +1,5 @@
 <template>
-  <div text="xl gray4" m-5 flex="~ gap3" justify-center>
-    <NuxtLink i-carbon-campsite to="/" />
-    <a i-carbon-logo-github href="https://github.com/antfu/vitesse-nuxt3" target="_blank" />
-    <DarkToggle />
+  <div justify-center pt2 text-center text-gray4>
+    驰宏科工&会泽冶炼 版权所有V1.0 @2023
   </div>
 </template>
