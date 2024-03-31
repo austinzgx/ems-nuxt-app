@@ -14,6 +14,7 @@ export const useSystemStore = defineStore('system', () => {
       { name: '水处理', id: 7 },
     ])
   const host = ref('10.198.74.241')
+  // 10.198.74.241
   const flask_port = ref('5432')
   const sql_port = ref('1433')
   const interval = ref(5)

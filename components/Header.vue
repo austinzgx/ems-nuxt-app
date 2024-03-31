@@ -13,7 +13,9 @@ function go() {
     isOpen.value = false
   }
 }
-
+function demo() {
+  router.push('/hot')
+}
 const date = useDateFormat(useNow(), 'YYYY-MM-DD HH:mm')
 const { toggle } = useFullscreen()
 const store = useSystemStore()
@@ -83,6 +85,9 @@ const current = computed(() => company.find(item => item.id === selectd.value))
       </UModal>
       <button i-carbon-fit-to-screen @click="toggle">
         fullscreen
+      </button>
+      <button i-carbon-3d-curve-manual @click="demo">
+        HOT
       </button>
     </div>
   </div>

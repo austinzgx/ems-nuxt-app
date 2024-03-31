@@ -10,7 +10,7 @@ export const useNormStore = defineStore('norm', () => {
     unit: string
     ref?: number
     src: string
-    params: Array<string>
+    params: any
   }>>([])
 
   const state = useLocalStorage('norm', json)

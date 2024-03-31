@@ -36,10 +36,6 @@ const systemStore = useSystemStore()
 
 const pieOption = ref<Array<any>>([])
 const lineStore = useLineStore()
-const matricStore = useMatricStore()
-
-const option = ref()
-
 const url = `http://${systemStore.host}:${systemStore.flask_port}`
 const { data: pieData, refresh: refreshChart } = await useFetch<any>(`${url}/api/chart`)
 // pie chart
@@ -170,7 +166,7 @@ onMounted(() => {
     refreshData()
     refreshChart()
     refreshMsg()
-  }, systemStore.interval * 100000)
+  }, systemStore.interval * 1000)
 })
 
 onUnmounted(() => {
@@ -192,125 +188,6 @@ const other = computed(() => data.value.filter(i => i.id === systemStore.current
 //   return `background: linear-gradient(90deg, ${color} ${rate}%, transparent 0%)`
 // }
 
-const show = ref(false)
-const currentMetric = ref()
-
-async function showDetail(item) {
-  const date = []
-  const value = []
-
-  await matricStore.getMatric(item.name).then((res: any) => {
-    res.forEach((row: Array<number>) => {
-      date.push(row[0])
-      value.push(row[1])
-    })
-  })
-
-  option.value = {
-    xAxis: {
-      type: 'category',
-      data: date,
-      boundaryGap: false,
-    },
-    yAxis: {
-      type: 'value',
-      min(value: any) {
-        return Math.floor(value.min * 0.9)
-      },
-      max(value: any) {
-        return Math.floor(value.max * 1.1)
-      },
-    },
-    series: [
-      {
-        data: value,
-        type: 'line',
-        smooth: true,
-        markLine: {
-          data: [{ type: 'average', name: 'Avg' }],
-        },
-      },
-
-    ],
-    tooltip: {
-      trigger: 'axis',
-      position(pt) {
-        return [pt[0], '10%']
-      },
-    },
-
-    dataZoom: [
-      {
-        type: 'inside',
-        start: 90,
-        end: 100,
-      },
-      {
-        start: 90,
-        end: 100,
-      },
-    ],
-  }
-  currentMetric.value = item
-  show.value = true
-}
-
-function changeSize(name, size) {
-  const date = []
-  const value = []
-  matricStore.changeSize(name, size).then((res) => {
-    res.forEach((row) => {
-      date.push(row[0])
-      value.push(row[1])
-    })
-    option.value = {
-      xAxis: {
-        type: 'category',
-        data: date,
-        boundaryGap: false,
-      },
-      yAxis: {
-        type: 'value',
-        min(value: any) {
-          return Math.floor(value.min * 0.9)
-        },
-        max(value: any) {
-          return Math.floor(value.max * 1.1)
-        },
-      },
-      series: [
-        {
-          data: value,
-          type: 'line',
-          smooth: true,
-          markLine: {
-            data: [{ type: 'average', name: 'Avg' }],
-          },
-        },
-
-      ],
-      tooltip: {
-        trigger: 'axis',
-        position(pt) {
-          return [pt[0], '10%']
-        },
-      },
-
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 90,
-          end: 100,
-        },
-        {
-          start: 90,
-          end: 100,
-        },
-      ],
-    }
-  })
-}
-
 function getValueColor(item: any) {
   if (item.value > item.ref)
     return 'text-red-600'
@@ -327,96 +204,61 @@ function getMsgColor(item: any) {
 </script>
 
 <template>
-  <div>
-    <UModal v-model="show" :ui="{ width: '' }">
-      <UCard h180 p4 :ui="{ base: { width: 'w-200' } }">
-        <div flex>
-          <div text-2xl fw600 text-teal>
-            {{ currentMetric.name }}
-          </div>
-          <div flex-auto />
-          <div text-xl>
-            基准值:{{ currentMetric.ref }}{{ currentMetric.unit }}
-          </div>
-          <div flex-auto />
-          <div flex gap2>
-            <UButton @click="changeSize(currentMetric.name, '日')">
-              日
-            </UButton>
-            <UButton @click="changeSize(currentMetric.name, '周')">
-              周
-            </UButton>
-            <UButton @click="changeSize(currentMetric.name, '月')">
-              月
-            </UButton>
-            <UButton @click="changeSize(currentMetric.name, '年')">
-              年
-            </UButton>
-          </div>
-        </div>
-        <br>
-        <div class="chart" h-100>
-          <VChart :option="option" autoresize />
-        </div>
-        <!-- <pre>{{ currentMetric }}</pre> -->
-        <!-- <pre>{{ option.series.data }}</pre> -->
-        <!-- <Placeholder class="h-48" /> -->
-      </UCard>
-    </UModal>
-
-    <div grid="~ cols-[1.2fr_5fr_3fr] gap-2">
-      <!-- left -->
-      <div>
-        <div v-for="item in other" :key="item.name" mb-2 p2 class="box" @click="showDetail(item)">
-          <!-- <div v-if="item.ref" float-right text-3 text-gray>
+  <div grid="~ cols-[1.2fr_5fr_3fr] gap-2">
+    <!-- left -->
+    <div>
+      <div v-for="item in other" :key="item.name" mb-2 p2 class="box">
+        <!-- <div v-if="item.ref" float-right text-3 text-gray>
           {{ ((item.value - item.ref) / item.ref * 99).toFixed(1) }}%
         </div> -->
-          <div text-xl :class="getValueColor(item)">
-            {{ item.value.toFixed(1) }}
-            <span text-sm text-gray>
-              {{ item.unit }}
-            </span>
+        <div text-xl :class="getValueColor(item)">
+          {{ item.value.toFixed(2) }}
+          <span text-sm text-gray>
+            {{ item.unit }}
+          </span>
+        </div>
+        <div text-sm>
+          {{ item.name }}
+        </div>
+      </div>
+    </div>
+
+    <!-- mid -->
+    <div grid="~ rows-[1.2fr_2fr_4fr] gap-y2">
+      <!-- foucs -->
+      <div flex="~ justify-between">
+        <div
+          v-for="item in foucs"
+          :key="item.name" class="box" max-w-380px min-w-180px pt-5
+        >
+          <div text-4xl fw-800 :class="getValueColor(item)">
+            {{ item.value.toFixed(2) }}
           </div>
-          <div text-sm>
+          <div v-if="item.ref" text-4 text-gray>
+            {{ ((item.value - item.ref) / item.ref * 99).toFixed(2) }}%
+          </div>
+          <div pt-3 text-sm>
             {{ item.name }}
+          </div>
+          <div text-gray>
+            {{ item.unit }}
           </div>
         </div>
       </div>
 
-      <!-- mid -->
-      <div grid="~ rows-[1.2fr_2fr_4fr] gap-y2">
-        <!-- foucs -->
-        <div flex="~ justify-between">
-          <div v-for="item in foucs" :key="item.name" class="box" max-w-380px min-w-180px pt-5
-            @click="showDetail(item)">
-            <div text-4xl fw-800 :class="getValueColor(item)">
-              {{ (+item.value).toFixed(2) }}
-            </div>
-            <div v-if="item.ref" text-4 text-gray>
-              {{ ((item.value - item.ref) / item.ref * 99).toFixed(2) }}%
-            </div>
-            <div pt-3 text-sm>
-              {{ item.name }}
-            </div>
-            <div text-gray>
-              {{ item.unit }}
-            </div>
-          </div>
+      <!-- dashboard -->
+      <div grid="~ cols-4 gap2">
+        <div v-for="(option, index) in pieOption" :key="index" class="chart">
+          <VChart :option="option" autoresize />
         </div>
+      </div>
 
-        <!-- dashboard -->
-        <div grid="~ cols-4 gap2">
-          <div v-for="(option, index) in pieOption" :key="index" class="chart">
-            <VChart :option="option" autoresize />
-          </div>
-        </div>
+      <div class="chart">
+        <VChart :option="lineStore.line_pre" autoresize />
+      </div>
 
-        <div class="chart">
-          <VChart :option="lineStore.line_pre" autoresize />
-        </div>
-
-        <!-- 能源预测 -->
-        <!-- <div grid="~ cols-3 gap2">
+    <!-- 能源预测 -->
+    <!-- <div grid="~ cols-3 gap2">
         <UCard>
           <div v-for="item in ele_pre" :key="item.name">
             <div pb-2>
@@ -463,47 +305,54 @@ function getMsgColor(item: any) {
           </div>
         </UCard>
       </div> -->
-      </div>
+    </div>
 
-      <!-- right -->
-      <div grid="~ rows-3 gap-y2 ">
-        <div class="chart">
-          <VChart :option="lineStore.line_flu" autoresize />
+    <!-- right -->
+    <div grid="~ rows-3 gap-y2 ">
+      <div class="chart">
+        <VChart :option="lineStore.line_flu" autoresize />
+      </div>
+      <div class="chart">
+        <VChart :option="lineStore.line_trend" autoresize />
+      </div>
+      <div class="box">
+        <div flex="~ gap1" float-right p3 text-xl fw600 c-lime>
+          <span i-carbon-information />
         </div>
-        <div class="chart">
-          <VChart :option="lineStore.line_trend" autoresize />
-        </div>
-        <div class="box">
-          <div flex="~ gap1" float-right p3 text-xl fw600 c-lime>
-            <span i-carbon-information />
+        <Vue3SeamlessScroll
+          class="scroll"
+          :list="messages"
+          :step="0.5"
+          :limit-scroll-num="8"
+          :single-height="0"
+          :single-wait-time="1000 "
+          :is-rem-unit="false"
+          :is-watch="true"
+          :delay="0"
+        >
+          <div v-for="(item, index) in messages" :key="index" flex="~ row gap3" p2 text-4>
+            <span v-text="item.date" />
+            <span :class="getMsgColor(item)" v-text="item.msg" />
           </div>
-          <Vue3SeamlessScroll class="scroll" :list="messages" :step="0.5" :limit-scroll-num="8" :single-height="0"
-            :single-wait-time="1000" :is-rem-unit="false" :is-watch="true" :delay="0">
-            <div v-for="(item, index) in messages" :key="index" flex="~ row gap3" p2 text-4>
-              <span v-text="item.date" />
-              <span :class="getMsgColor(item)" v-text="item.msg" />
-            </div>
-          </Vue3SeamlessScroll>
-        </div>
+        </Vue3SeamlessScroll>
       </div>
     </div>
   </div>
 </template>
 
 <style>
-.box,
-.chart {
+.box, .chart{
   border-width: 1px;
   border-radius: 5px;
-  border-color: #444;
+  border-color:#444;
   /* background-color: transparent !important; */
 }
 
-.box:hover {
-  background: rgba(58, 229, 98, 0.4)
+.box:hover{
+ background: rgba(58, 229, 98, 0.4)
 }
 
-.scroll {
+.scroll{
   height: 300px;
   overflow: hidden;
 }
