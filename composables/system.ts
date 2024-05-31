@@ -1,31 +1,68 @@
 import { defineStore } from 'pinia'
 
+interface ReturnConfig {
+  system: System
+  config: Config[]
+}
+export interface Config {
+  name: string
+  data: ConfigData[]
+}
+
+interface System {
+  sql_port: number
+  interval: number
+  sql_username: string
+  sql_password: string
+}
+export interface ConfigData {
+  id: number
+  type: number
+  name: string
+  value: number
+  unit: string
+  ref?: number
+  src: string
+  params: any
+}
+
 export const useSystemStore = defineStore('system', () => {
-  const currentId = ref(0)
-  const company = ref(
-    [
-      { name: '分公司', id: 0 },
-      { name: '粗铅', id: 1 },
-      { name: '综合回收 ', id: 2 },
-      { name: '电解', id: 3 },
-      { name: '制液', id: 4 },
-      { name: '焙烧', id: 5 },
-      { name: '动力', id: 6 },
-      { name: '水处理', id: 7 },
-    ])
-  const host = ref('10.198.74.241')
-  // 10.198.74.241
-  const flask_port = ref('5432')
-  const sql_port = ref('1433')
-  const interval = ref(5)
-  const pwd = ref('')
+  const host = ref<string>('localhost') // ('10.198.74.241')
+  const port = ref<number>(5432)
+  const config = ref<Config[]>([])
+  const system = ref<System>()
+  const admin_password = ref('pims#1234')
+
+  const url = `http://${host.value}:${port.value}/api/config`
+
+  async function fetchConf() {
+    const res: ReturnConfig = await $fetch(url)
+    config.value = res.config
+    system.value = res.system
+  }
+
+  function addData(formData: any) {
+    config.value.push(formData)
+  }
+  function removeData(formData: any) {
+    config.value.splice(config.value.indexOf(formData), 1)
+  }
+
+  async function saveData() {
+    await $fetch(url, {
+      method: 'POST', body: config.value,
+    })
+  }
+
   return {
-    company,
-    currentId,
+    config,
+    system,
     host,
-    flask_port,
-    sql_port,
-    interval,
-    pwd,
+    port,
+    admin_password,
+    fetchConf,
+    addData,
+    saveData,
+    removeData,
   }
 })

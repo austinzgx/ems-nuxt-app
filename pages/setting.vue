@@ -1,16 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-definePageMeta({
-  middleware: 'auth',
-})
+// definePageMeta({
+//   middleware: 'auth',
+// })
 
 const systemStore = useSystemStore()
 const store = storeToRefs(useSystemStore())
 
-const normStore = useNormStore()
-const data = ref()
-const id = computed(() => systemStore.currentId)
 const columns = [
   { key: 'name', label: 'Name' },
   { key: 'type', label: 'Type', sortable: true },
@@ -21,55 +18,57 @@ const columns = [
   { key: 'params', label: 'Params' },
 ]
 
-onMounted(() => {
-  data.value = normStore.state.filter(i => i.id === systemStore.currentId).sort((a, b) => a.type < b.type).sort((a, b) => a.sort < b.sort)
-})
-
-watch(id, (newVar) => {
-  data.value = normStore.state.filter(i => i.id === newVar).sort((a, b) => a.type < b.type).sort((a, b) => a.sort < b.sort)
-})
-
-const connState = ref(false)
+const conndata = ref(false)
 function testSqlConn() {
   //  todo getAPItest()
-  connState.value = true
+  conndata.value = true
 }
 //
 </script>
 
 <template>
-  <div grid="~ cols-[1fr_5fr] gap2" text-left>
+  <div grid="~ cols-[max-content_1fr] gap2" p2 text-left>
     <UCard :ui="{ background: 'dark:bg-gray:5' }">
-      <div grid="~ rows-[1fr_3fr] gap-y10">
-        <div pb-2>
-          <span text-xl fw-600 text-lime>系统配置</span>
-          <h1>刷新频率(s):</h1>
+      <template #header>
+        <span text-xl fw-600 text-lime>系统配置</span>
+      </template>
+      <div grid="~ rows-[1fr_3fr] gap4">
+        <div space-y-2>
+          <h1 c-teal>
+            数据刷新频率(s):
+          </h1>
           <UInput v-model="store.interval.value" text-center />
-          <h1 pt-5>
+        </div>
+        <div space-y-2>
+          <h1 c-teal>
             数据库:
           </h1>
           <div grid="~ cols-[1fr_2fr]">
-            Host:<UInput :value="systemStore.host" />
+            Host <UInput :value="systemStore.host" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            Sql_Port:<UInput :value="systemStore.sql_port" />
+            Sql_Port <UInput :value="systemStore.sql_port" />
+          </div> <div grid="~ cols-[1fr_2fr]">
+            Flask_Port <UInput :value="systemStore.flask_port" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            Flask_Port:<UInput :value="systemStore.flask_port" />
+            UserName <UInput :value="sa" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            UserName:<UInput value="sa" />
+            Password: <UInput type="password" value="!QAZ2wsx" />
           </div>
-          <div grid="~ cols-[1fr_2fr]">
-            Password:<UInput type="password" value="!QAZ2wsx" />
-          </div>
+
           <div text-xl>
-            <UButton mt2 h-8 pl2 pr-2 @click="testSqlConn">
-              Ping SQL Server
+            <UButton h-8 w30 pl2 pr-2 @click="testSqlConn">
+              Ping Server
             </UButton>
-            <span v-if="connState" i-carbon-connect text-lime>YES</span>
-            <span v-if="!connState" i-carbon-error text-red-600>NO</span>
+            <span v-if="conndata" i-carbon-connect text-lime>YES</span>
+            <span v-if="!conndata" i-carbon-error text-red-600>NO</span>
           </div>
+
+          <UButton h-8 w30 pl2 pr-2 @click="systemStore.saveData">
+            Save Config
+          </UButton>
         </div>
       </div>
     </UCard>

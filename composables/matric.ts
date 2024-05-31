@@ -1,14 +1,14 @@
 import { defineStore } from 'pinia'
+import { useSystemStore } from './system'
 
 const time = useDateFormat(useNow(), 'YYYY-MM-DD HH:mm:ss')
 
 export const useMatricStore = defineStore('matric', () => {
-  const normStore = useNormStore()
   const systemStore = useSystemStore()
 
   const sp_url = `http://${systemStore.host}:${systemStore.flask_port}`
   function getMatric(name: string) {
-    const params = normStore.state.filter(i => i.name === name)[0].params
+    const params = systemStore.data.filter(i => i.name === name)[0].params
     const data = $fetch(`${sp_url}/api/sp`, {
       method: 'POST',
       body: params,
@@ -16,7 +16,7 @@ export const useMatricStore = defineStore('matric', () => {
     return data
   }
   function changeSize(name: string, type: string) {
-    const params = normStore.state.filter(i => i.name === name)[0].params
+    const params = systemStore.data.filter(i => i.name === name)[0].params
     const data = $fetch(`${sp_url}/api/sp`, {
       method: 'POST',
       body: {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import json from './data/line.json'
+import json from '../data/line.json'
 
 let base = +new Date(2020, 1, 1)
 const oneDay = 24 * 3600 * 1000
@@ -22,9 +22,9 @@ export const useLineStore = defineStore('line', () => {
   const line_flu = ref()
   const line_trend = ref()
 
-  const state = useLocalStorage('line', json)
+  const state =  json
 
-  state.value.forEach((item) => {
+  state.forEach((item) => {
     if (item.type === 0) {
       line_pre.value = {
         backgroundColor: '',

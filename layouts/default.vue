@@ -1,9 +1,9 @@
 <template>
-  <div grid="~ rows-[60px_auto_30px]" h-100vh select-none text-center>
-    <Header m2 />
-    <div overflow-y-scroll pb-5>
+  <div h-100vh select-none text-center>
+    <Header h-60px p2 />
+    <div style="height: calc(100vh - 90px);" overflow-y-scroll pt2 border-b="~ 1px solid gray/40">
       <slot />
     </div>
-    <Footer bottom-2 bg-green:5 />
+    <Footer h-30px />
   </div>
 </template>

@@ -32,7 +32,6 @@ export default defineNuxtConfig({
     prerender: {
       crawlLinks: false,
       routes: ['/'],
-      ignore: ['/hi'],
     },
   },
 
@@ -52,7 +51,7 @@ export default defineNuxtConfig({
     },
   },
 
-  pwa,
+  // pwa,
 
   colorMode: {
     preference: 'dark',
@@ -66,6 +65,6 @@ export default defineNuxtConfig({
     transpile: [/echarts/, /zrender/],
   },
 
-  routeRules: { '/': { ssr: false } },
+  // routeRules: { '/': { ssr: false } },
 
 })
