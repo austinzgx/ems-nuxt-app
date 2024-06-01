@@ -17,8 +17,6 @@ import { Vue3SeamlessScroll } from 'vue3-seamless-scroll'
 const route = useRoute()
 const name = (route.params as { name: string }).name
 
-// When accessing /posts/1, route.params.id will be 1
-
 use([
   CanvasRenderer,
   GridComponent,
@@ -45,8 +43,9 @@ const matricStore = useMatricStore()
 const option = ref()
 
 const url = `http://${systemStore.host}:${systemStore.port}`
-const { data: pieData, refresh: refreshChart } = await useFetch<any>(`${url}/api/chart`)
+
 // pie chart
+const { data: pieData, refresh: refreshChart } = await useFetch<any>(`${url}/api/chart`)
 for (const item of pieData?.value) {
   if (item.type === 1) {
     pieOption.value.push(
@@ -165,35 +164,36 @@ for (const item of pieData?.value) {
     })
   }
 }
+
+// data
 const data = ref<ConfigData[] | null>(null)
-// 定义一个方法来获取数据
+
 async function fetchData() {
   data.value = await $fetch<ConfigData[]>(`${url}/api/data`, { method: 'POST', body: { name } }) || null
 }
-// data
 
 const foucs = computed(() => data.value?.filter(i => i.type === 0) || [])
 const other = computed(() => data.value?.filter(i => i.type === 1) || [])
 
 const { data: messages, refresh: refreshMsg } = await useFetch<any>(`${url}/api/msg`)
 
-let tm: any
-onMounted(() => {
-  tm = setInterval(() => {
-    fetchData()
-    refreshChart()
-    refreshMsg()
-  }, (systemStore?.system?.interval || 5) * 1000)
-})
+// let tm: any
+// onMounted(() => {
+//   // tm = setInterval(() => {
+//     fetchData()
+//     refreshChart()
+//     refreshMsg()
+//   }, (systemStore?.system?.value.interval || 10) * 1000)
+// })
 
 onMounted(async () => {
-  fetchData()
-  await systemStore.fetchConf()
+  await fetchData()
 })
-onUnmounted(() => {
-  if (tm)
-    clearInterval(tm)
-})
+
+// onUnmounted(() => {
+//   if (tm)
+//     clearInterval(tm)
+// })
 
 // const ele_pre = computed(() => normStore.state.filter(i => i.id === systemStore.currentId).filter(i => i.type === 2).filter(i => i.sort === 0))
 // const lng_pre = computed(() => normStore.state.filter(i => i.id === systemStore.currentId).filter(i => i.type === 2).filter(i => i.sort === 1))
@@ -510,7 +510,7 @@ function getMsgColor(item: any) {
 <style>
 .box,
 .chart {
-  --uno: rounded-2 p2;
+  --uno: rounded-2 p2 border-1 border-solid border-gray/30;
 }
 
 .box:hover {

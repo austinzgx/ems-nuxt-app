@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
-
 // definePageMeta({
 //   middleware: 'auth',
 // })
 
-const systemStore = useSystemStore()
-const store = storeToRefs(useSystemStore())
+const store = useSystemStore()
+const system = ref(store.system!)
+const config = ref(store.config!)
 
 const columns = [
-  { key: 'name', label: 'Name' },
-  { key: 'type', label: 'Type', sortable: true },
-  { key: 'sort', label: 'Index' },
-  { key: 'unit', label: 'Unit' },
-  { key: 'ref', label: 'Ref' },
-  { key: 'src', label: 'API' },
-  { key: 'params', label: 'Params' },
+  { key: 'name', label: '指标项' },
+  { key: 'type', label: '类型', sortable: true },
+  { key: 'sort', label: '排序', sortable: true },
+  { key: 'unit', label: '单位' },
+  { key: 'ref', label: '参考值' },
+  { key: 'src', label: 'API接口' },
+  { key: 'params', label: '采集参数' },
+  { key: 'actions', label: '编辑' },
 ]
 
 const conndata = ref(false)
@@ -23,60 +23,85 @@ function testSqlConn() {
   //  todo getAPItest()
   conndata.value = true
 }
-//
 </script>
 
 <template>
   <div grid="~ cols-[max-content_1fr] gap2" p2 text-left>
     <UCard :ui="{ background: 'dark:bg-gray:5' }">
       <template #header>
-        <span text-xl fw-600 text-lime>系统配置</span>
+        <div flex gap4>
+          <i i-carbon-settings text-xl c-lime />
+          <span text-xl fw-600 text-lime>系统配置</span>
+        </div>
       </template>
-      <div grid="~ rows-[1fr_3fr] gap4">
+      <div space-y-10>
         <div space-y-2>
           <h1 c-teal>
             数据刷新频率(s):
           </h1>
-          <UInput v-model="store.interval.value" text-center />
+          <UInput v-model="system.interval" text-center type="number" />
         </div>
+
         <div space-y-2>
           <h1 c-teal>
-            数据库:
+            服务器地址:
           </h1>
           <div grid="~ cols-[1fr_2fr]">
-            Host <UInput :value="systemStore.host" />
+            Host <UInput v-model="store.host" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            Sql_Port <UInput :value="systemStore.sql_port" />
-          </div> <div grid="~ cols-[1fr_2fr]">
-            Flask_Port <UInput :value="systemStore.flask_port" />
+            Port <UInput v-model="store.port" />
           </div>
-          <div grid="~ cols-[1fr_2fr]">
-            UserName <UInput :value="sa" />
-          </div>
-          <div grid="~ cols-[1fr_2fr]">
-            Password: <UInput type="password" value="!QAZ2wsx" />
-          </div>
+        </div>
 
+        <div space-y-2>
+          <h1 c-teal>
+            SQL数据库:
+          </h1>
           <div text-xl>
             <UButton h-8 w30 pl2 pr-2 @click="testSqlConn">
               Ping Server
             </UButton>
-            <span v-if="conndata" i-carbon-connect text-lime>YES</span>
-            <span v-if="!conndata" i-carbon-error text-red-600>NO</span>
+            <i class="conndata ? 'i-carbon-connect' : 'i-carbon-error'" text-lime />
           </div>
 
-          <UButton h-8 w30 pl2 pr-2 @click="systemStore.saveData">
-            Save Config
-          </UButton>
+          <div grid="~ cols-[1fr_2fr]">
+            Sql_Port <UInput v-model="system.sql_port" />
+          </div>
+          <div grid="~ cols-[1fr_2fr]">
+            UserName <UInput v-model="system.sql_username" />
+          </div>
+          <div grid="~ cols-[1fr_2fr]">
+            Password: <UInput v-model="system.sql_password" type="password" />
+          </div>
         </div>
+
+        <UButton h-8 w-full justify-center @click="store.saveData">
+          Save Config
+        </UButton>
       </div>
     </UCard>
 
-    <UCard :ui="{ background: 'dark:bg-gray:5' }">
-      <UTable :rows="data" :columns="columns" />
-    </UCard>
-
+    <div space-y-2>
+      <div v-for="item of config" :key="item.name">
+        <UCard :ui="{ background: 'dark:bg-gray:5' }">
+          <template #header>
+            <div flex items-center gap4>
+              <i i-carbon-commit text-xl c-lime />
+              <span text-xl fw-600 text-lime>{{ item.name }}  </span>
+              <span text-gray op50> {{ item.data.length }}</span>
+            </div>
+          </template>
+          <UTable :rows="item.data" :columns="columns">
+            <template #data-Actions="{ actions }">
+              <div c-teal>
+                <UButton label="row" />
+              </div>
+            </template>
+          </UTable>
+        </UCard>
+      </div>
+    </div>
     <!-- <div>
         <span text-xl fw-600 text-green>Line</span>
         <button i-carbon:add-filled bg-lime pl-10 @click="addData" />

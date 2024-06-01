@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-interface ReturnConfig {
+export interface ReturnConfig {
   system: System
   config: Config[]
 }
@@ -9,7 +9,7 @@ export interface Config {
   data: ConfigData[]
 }
 
-interface System {
+export interface System {
   sql_port: number
   interval: number
   sql_username: string
@@ -29,36 +29,43 @@ export interface ConfigData {
 export const useSystemStore = defineStore('system', () => {
   const host = ref<string>('localhost') // ('10.198.74.241')
   const port = ref<number>(5432)
-  const config = ref<Config[]>([])
-  const system = ref<System>()
   const admin_password = ref('pims#1234')
-
+  const config = ref<Config[]>()
+  const system = ref<System>()
   const url = `http://${host.value}:${port.value}/api/config`
 
   async function fetchConf() {
-    const res: ReturnConfig = await $fetch(url)
-    config.value = res.config
-    system.value = res.system
+    const data: ReturnConfig = await $fetch(url)
+    config.value = data.config as Config[]
+    system.value = data.system
+    return data
   }
 
   function addData(formData: any) {
-    config.value.push(formData)
+    config.value!.push(formData)
   }
   function removeData(formData: any) {
-    config.value.splice(config.value.indexOf(formData), 1)
+    config.value!.splice(config.value!.indexOf(formData), 1)
   }
 
   async function saveData() {
     await $fetch(url, {
-      method: 'POST', body: config.value,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: {
+        config: config.value,
+        system: system.value,
+      },
     })
   }
 
   return {
-    config,
-    system,
     host,
     port,
+    config,
+    system,
     admin_password,
     fetchConf,
     addData,

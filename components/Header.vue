@@ -8,8 +8,8 @@ onMounted(async () => {
 })
 
 const date = useDateFormat(useNow(), 'YYYY-MM-DD HH:mm')
+
 const { toggle } = useFullscreen()
-const config = store.config
 
 const companys = ['分公司', '粗铅', '综合回收', '电解', '制液', '焙烧', '水处理']
 
@@ -17,7 +17,7 @@ const company = ref(companys[0])
 </script>
 
 <template>
-  <div grid="~ cols-[200px_1fr_220px] gap2" items-center class="head">
+  <div grid="~ cols-[240px_1fr_240px] gap2" items-center class="head">
     <div flex="~ gap5" items-center>
       <img h-11 w-15 pl-4 pt-1 src="/logo.png" @click="navigateTo('/')">
       <USelect
@@ -38,11 +38,12 @@ const company = ref(companys[0])
       驰宏锌锗会泽冶炼超强能源管理系统
     </div>
 
-    <div flex="~ gap4" pt-2 text-xl text-cyan-500>
+    <div flex="~ gap2" pt-2 text-xl text-cyan-500>
       <span text-white>{{ date }}</span>
       <button i-carbon-fit-to-screen @click="toggle">
         fullscreen
       </button>
+      <button i-carbon-settings @click="navigateTo('/setting')" />
     </div>
   </div>
 </template>
