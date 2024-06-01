@@ -23,19 +23,28 @@ export interface ConfigData {
   unit: string
   ref?: number
   src: string
-  params: any
+  params: Param
+}
+
+export interface Param {
+  org1: string
+  org2: string
+  org3: string
+  org4: string
+  sheetName: string
+  vtype: string
 }
 
 export const useSystemStore = defineStore('system', () => {
-  const host = ref<string>('localhost') // ('10.198.74.241')
+  const host = ref<string>('localhost') // ('10.198.74.241') //
   const port = ref<number>(5432)
   const admin_password = ref('pims#1234')
   const config = ref<Config[]>()
   const system = ref<System>()
-  const url = `http://${host.value}:${port.value}/api/config`
+  const url = `http://${host.value}:${port.value}`
 
   async function fetchConf() {
-    const data: ReturnConfig = await $fetch(url)
+    const data: ReturnConfig = await $fetch(`${url}/api/config`)
     config.value = data.config as Config[]
     system.value = data.system
     return data
@@ -61,6 +70,32 @@ export const useSystemStore = defineStore('system', () => {
     })
   }
 
+  async function getMatric(config: ConfigData) {
+    const data = await $fetch(`${url}/api/sp`, {
+      method: 'POST',
+      body: config.params,
+    })
+    if (!data) {
+      const mock_data = [[5, 100], [6, 200]]
+      return mock_data
+    }
+    return data
+  }
+  async function changeMatricSize(config: ConfigData, type: string) {
+    const data = await $fetch(`${url}/api/sp`, {
+      method: 'POST',
+      body: {
+        ...config.params,
+        size: type,
+      },
+    })
+    if (!data) {
+      const mock_data = [['5/30', '220'], ['5/31', '100'], ['6/1', '200']]
+      return mock_data
+    }
+    return data
+  }
+
   return {
     host,
     port,
@@ -71,5 +106,7 @@ export const useSystemStore = defineStore('system', () => {
     addData,
     saveData,
     removeData,
+    getMatric,
+    changeMatricSize,
   }
 })

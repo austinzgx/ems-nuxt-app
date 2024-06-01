@@ -47,10 +47,12 @@ function testSqlConn() {
             服务器地址:
           </h1>
           <div grid="~ cols-[1fr_2fr]">
-            Host <UInput v-model="store.host" />
+            Host
+            <UInput v-model="store.host" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            Port <UInput v-model="store.port" />
+            Port
+            <UInput v-model="store.port" />
           </div>
         </div>
 
@@ -66,13 +68,16 @@ function testSqlConn() {
           </div>
 
           <div grid="~ cols-[1fr_2fr]">
-            Sql_Port <UInput v-model="system.sql_port" />
+            Sql_Port
+            <UInput v-model="system.sql_port" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            UserName <UInput v-model="system.sql_username" />
+            UserName
+            <UInput v-model="system.sql_username" />
           </div>
           <div grid="~ cols-[1fr_2fr]">
-            Password: <UInput v-model="system.sql_password" type="password" />
+            Password:
+            <UInput v-model="system.sql_password" type="password" />
           </div>
         </div>
 
@@ -88,15 +93,34 @@ function testSqlConn() {
           <template #header>
             <div flex items-center gap4>
               <i i-carbon-commit text-xl c-lime />
-              <span text-xl fw-600 text-lime>{{ item.name }}  </span>
+              <span text-xl fw-600 text-lime>{{ item.name }} </span>
               <span text-gray op50> {{ item.data.length }}</span>
             </div>
           </template>
           <UTable :rows="item.data" :columns="columns">
-            <template #data-Actions="{ actions }">
-              <div c-teal>
-                <UButton label="row" />
-              </div>
+            <template #name-data="{ row }">
+              <UInput v-model="row.name" />
+            </template>
+            <template #type-data="{ row }">
+              <UInput v-model="row.type" type="number" />
+            </template>
+            <template #sort-data="{ row }">
+              <UInput v-model="row.sort" type="number" />
+            </template>
+            <template #unit-data="{ row }">
+              <UInput v-model="row.unit" />
+            </template>
+            <template #ref-data="{ row }">
+              <UInput v-model="row.ref" type="number" />
+            </template>
+            <template #src-data="{ row }">
+              <UInput v-model="row.src" />
+            </template>
+            <template #params-data="{ row }">
+              <UInput v-model="row.params" />
+            </template>
+            <template #actions-data="{ row }">
+              <UButton :label="row.index" />
             </template>
           </UTable>
         </UCard>

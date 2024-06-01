@@ -38,7 +38,6 @@ const systemStore = useSystemStore()
 
 const pieOption = ref<Array<any>>([])
 const lineStore = useLineStore()
-const matricStore = useMatricStore()
 
 const option = ref()
 
@@ -177,23 +176,23 @@ const other = computed(() => data.value?.filter(i => i.type === 1) || [])
 
 const { data: messages, refresh: refreshMsg } = await useFetch<any>(`${url}/api/msg`)
 
-// let tm: any
-// onMounted(() => {
-//   // tm = setInterval(() => {
-//     fetchData()
-//     refreshChart()
-//     refreshMsg()
-//   }, (systemStore?.system?.value.interval || 10) * 1000)
-// })
+let tm: any
+onMounted(() => {
+  tm = setInterval(async () => {
+    await fetchData()
+    await refreshChart()
+    await refreshMsg()
+  }, (systemStore.system?.interval || 10) * 1000)
+})
 
 onMounted(async () => {
   await fetchData()
 })
 
-// onUnmounted(() => {
-//   if (tm)
-//     clearInterval(tm)
-// })
+onUnmounted(() => {
+  if (tm)
+    clearInterval(tm)
+})
 
 // const ele_pre = computed(() => normStore.state.filter(i => i.id === systemStore.currentId).filter(i => i.type === 2).filter(i => i.sort === 0))
 // const lng_pre = computed(() => normStore.state.filter(i => i.id === systemStore.currentId).filter(i => i.type === 2).filter(i => i.sort === 1))
@@ -210,119 +209,74 @@ function getRangeColor(value: number, ref: number) {
 const show = ref(false)
 const currentMetric = ref()
 
-async function showDetail(item) {
-  // const date = []
-  // const value = []
+async function showDetail(config: ConfigData) {
+  const date: number[] = []
+  const value: number[] = []
 
-  // await matricStore.getMatric(item.name).then((res: any) => {
-  //   res.forEach((row: Array<number>) => {
-  //     date.push(row[0])
-  //     value.push(row[1])
-  //   })
-  // })
+  const matric: number[][] = await systemStore.getMatric(config)
+  if (matric) {
+    matric.forEach((m: Array<number>) => {
+      date.push(m[0])
+      value.push(m[1])
+    })
+  }
 
-  // option.value = {
-  //   xAxis: {
-  //     type: 'category',
-  //     data: date,
-  //     boundaryGap: false,
-  //   },
-  //   yAxis: {
-  //     type: 'value',
-  //     min(value: any) {
-  //       return Math.floor(value.min * 0.9)
-  //     },
-  //     max(value: any) {
-  //       return Math.floor(value.max * 1.1)
-  //     },
-  //   },
-  //   series: [
-  //     {
-  //       data: value,
-  //       type: 'line',
-  //       smooth: true,
-  //       markLine: {
-  //         data: [{ type: 'average', name: 'Avg' }],
-  //       },
-  //     },
+  option.value = {
+    xAxis: {
+      type: 'category',
+      data: date,
+      boundaryGap: false,
+    },
+    yAxis: {
+      type: 'value',
+      min(value: any) {
+        return Math.floor(value.min * 0.9)
+      },
+      max(value: any) {
+        return Math.floor(value.max * 1.1)
+      },
+    },
+    series: [
+      {
+        data: value,
+        type: 'line',
+        smooth: true,
+        markLine: {
+          data: [{ type: 'average', name: 'Avg' }],
+        },
+      },
 
-  //   ],
-  //   tooltip: {
-  //     trigger: 'axis',
-  //     position(pt) {
-  //       return [pt[0], '10%']
-  //     },
-  //   },
+    ],
+    tooltip: {
+      trigger: 'axis',
+      position(pt) {
+        return [pt[0], '10%']
+      },
+    },
 
-  //   dataZoom: [
-  //     {
-  //       type: 'inside',
-  //       start: 90,
-  //       end: 100,
-  //     },
-  //     {
-  //       start: 90,
-  //       end: 100,
-  //     },
-  //   ],
-  // }
-  // currentMetric.value = item
-  // show.value = true
+    dataZoom: [
+      {
+        type: 'inside',
+        start: 90,
+        end: 100,
+      },
+      {
+        start: 90,
+        end: 100,
+      },
+    ],
+  }
+  show.value = true
+  currentMetric.value = config
 }
 
-function changeSize(name, size) {
-  const date = []
-  const value = []
-  matricStore.changeSize(name, size).then((res) => {
-    res.forEach((row) => {
-      date.push(row[0])
-      value.push(row[1])
-    })
-    option.value = {
-      xAxis: {
-        type: 'category',
-        data: date,
-        boundaryGap: false,
-      },
-      yAxis: {
-        type: 'value',
-        min(value: any) {
-          return Math.floor(value.min * 0.9)
-        },
-        max(value: any) {
-          return Math.floor(value.max * 1.1)
-        },
-      },
-      series: [
-        {
-          data: value,
-          type: 'line',
-          smooth: true,
-          markLine: {
-            data: [{ type: 'average', name: 'Avg' }],
-          },
-        },
-
-      ],
-      tooltip: {
-        trigger: 'axis',
-        position(pt) {
-          return [pt[0], '10%']
-        },
-      },
-
-      dataZoom: [
-        {
-          type: 'inside',
-          start: 90,
-          end: 100,
-        },
-        {
-          start: 90,
-          end: 100,
-        },
-      ],
-    }
+async function changeSize(config: ConfigData, size: string) {
+  const date: number[] = []
+  const value: number[] = []
+  const matric: number[][] = await systemStore.changeMatricSize(config, size)
+  matric.forEach((m: Array<number>) => {
+    date.push(m[0])
+    value.push(m[1])
   })
 }
 
@@ -343,39 +297,44 @@ function getMsgColor(item: any) {
 
 <template>
   <UModal v-model="show" :ui="{ width: '' }">
-    <UCard h180 p4 :ui="{ base: { width: 'w-200' } }">
-      <div flex>
-        <div text-2xl fw600 text-teal>
-          {{ currentMetric.name }}
+    <div h-100 w-full>
+      <UCard>
+        <template #header>
+          <div flex>
+            <div text-2xl fw600 text-teal>
+              {{ currentMetric.name }}
+            </div>
+            <div flex-auto />
+            <div text-xl>
+              基准值:{{ currentMetric.ref }}{{ currentMetric.unit }}
+            </div>
+            <div flex-auto />
+            <div flex gap2>
+              <UButton @click="changeSize(currentMetric.name, '日')">
+                日
+              </UButton>
+              <UButton @click="changeSize(currentMetric.name, '周')">
+                周
+              </UButton>
+              <UButton @click="changeSize(currentMetric.name, '月')">
+                月
+              </UButton>
+              <UButton @click="changeSize(currentMetric.name, '年')">
+                年
+              </UButton>
+            </div>
+          </div>
+        </template>
+        <div w-300>
+          <div class="chart" h-100>
+            <VChart :option="option" autoresize />
+          </div>
+          <!-- <pre>{{ currentMetric }}</pre> -->
+          <!-- <pre>{{ option.series.data }}</pre> -->
+          <!-- <Placeholder class="h-48" /> -->
         </div>
-        <div flex-auto />
-        <div text-xl>
-          基准值:{{ currentMetric.ref }}{{ currentMetric.unit }}
-        </div>
-        <div flex-auto />
-        <div flex gap2>
-          <!-- <UButton @click="changeSize(currentMetric.name, '日')">
-              日
-            </UButton>
-            <UButton @click="changeSize(currentMetric.name, '周')">
-              周
-            </UButton>
-            <UButton @click="changeSize(currentMetric.name, '月')">
-              月
-            </UButton>
-            <UButton @click="changeSize(currentMetric.name, '年')">
-              年
-            </UButton> -->
-        </div>
-      </div>
-      <br>
-      <div class="chart" h-100>
-        <VChart :option="option" autoresize />
-      </div>
-      <!-- <pre>{{ currentMetric }}</pre> -->
-      <!-- <pre>{{ option.series.data }}</pre> -->
-      <!-- <Placeholder class="h-48" /> -->
-    </UCard>
+      </UCard>
+    </div>
   </UModal>
 
   <div grid="~ cols-[1.2fr_5fr_3fr] gap-2" h-full>
@@ -401,10 +360,7 @@ function getMsgColor(item: any) {
     <div grid="~ rows-[1.2fr_2fr_4fr] gap-y2">
       <!-- foucs -->
       <div flex="~ justify-between">
-        <div
-          v-for="item in foucs" :key="item.name" class="box" min-w-180px w-full pt-15
-          @click="showDetail(item)"
-        >
+        <div v-for="item in foucs" :key="item.name" class="box" min-w-180px w-full pt-15 @click="showDetail(item)">
           <div text-4xl fw-800 :class="getValueColor(item)">
             {{ (+item.value).toFixed(2) }}
           </div>
