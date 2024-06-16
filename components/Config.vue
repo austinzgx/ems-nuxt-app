@@ -4,8 +4,8 @@
 // })
 
 const store = useSystemStore()
-const system = ref(store.system!)
-const config = ref(store.config!)
+const system = computed(() => store.system)
+const config = computed(() => store.config)
 
 const columns = [
   { key: 'name', label: '指标项' },
@@ -13,9 +13,8 @@ const columns = [
   { key: 'sort', label: '排序', sortable: true },
   { key: 'unit', label: '单位' },
   { key: 'ref', label: '参考值' },
-  { key: 'src', label: 'API接口' },
-  { key: 'params', label: '采集参数' },
-  { key: 'actions', label: '编辑' },
+  // { key: 'src', label: 'API接口' },
+  // { key: 'params', label: '采集参数' },
 ]
 
 const conndata = ref(false)
@@ -26,15 +25,51 @@ function testSqlConn() {
 </script>
 
 <template>
-  <div grid="~ cols-[max-content_1fr] gap2" p2 text-left>
-    <UCard :ui="{ background: 'dark:bg-gray:5' }">
+  <!-- <pre>{{ config }}</pre> -->
+  <div overflow-auto space-y-2>
+    <UButton mx3 pt2 @click="store.saveData">
+      Save Config
+    </UButton>
+
+    <div v-for="item of config" :key="item.name">
+      <UCard :ui="{ background: '', header: { padding: 'p2' }, body: { padding: 'p2' } }">
+        <template #header>
+          <div flex items-center gap4>
+            <i i-carbon-commit text-xl c-lime />
+            <span text-xl fw-600 text-lime>{{ item.name }} </span>
+            <span text-gray op50> {{ item.data.length }}</span>
+          </div>
+        </template>
+        <UTable :rows="item.data" :columns="columns" :ui="{ base: '', th: { padding: 'p2' }, td: { padding: 'p2' } }">
+          <template #name-data="{ row }">
+            <UInput v-model="row.name" size="sm" :ui="{ base: 'w-40' }" />
+          </template>
+          <template #type-data="{ row }">
+            <UInput v-model="row.type" type="number" size="sm" :ui="{ base: 'w-14' }" />
+          </template>
+          <template #sort-data="{ row }">
+            <UInput v-model="row.sort" type="number" size="sm" :ui="{ base: 'w-14' }" />
+          </template>
+          <template #unit-data="{ row }">
+            <UInput v-model="row.unit" size="sm" :ui="{ base: 'w-20' }" />
+          </template>
+          <template #ref-data="{ row }">
+            <UInput v-model="row.ref" type="number" size="sm" :ui="{ base: 'w-20' }" />
+          </template>
+          <template #params-data="{ row }">
+            <UInput v-model="row.params" size="sm" />
+          </template>
+        </UTable>
+      </UCard>
+    </div>
+    <UCard :ui="{ background: '', header: { padding: 'p2' }, body: { padding: 'p2' } }">
       <template #header>
-        <div flex gap4>
+        <div flex gap1>
           <i i-carbon-settings text-xl c-lime />
           <span text-xl fw-600 text-lime>系统配置</span>
         </div>
       </template>
-      <div space-y-10>
+      <div space-y-2>
         <div space-y-2>
           <h1 c-teal>
             数据刷新频率(s):
@@ -80,53 +115,10 @@ function testSqlConn() {
             <UInput v-model="system.sql_password" type="password" />
           </div>
         </div>
-
-        <UButton h-8 w-full justify-center @click="store.saveData">
-          Save Config
-        </UButton>
       </div>
     </UCard>
-
-    <div space-y-2>
-      <div v-for="item of config" :key="item.name">
-        <UCard :ui="{ background: 'dark:bg-gray:5' }">
-          <template #header>
-            <div flex items-center gap4>
-              <i i-carbon-commit text-xl c-lime />
-              <span text-xl fw-600 text-lime>{{ item.name }} </span>
-              <span text-gray op50> {{ item.data.length }}</span>
-            </div>
-          </template>
-          <UTable :rows="item.data" :columns="columns">
-            <template #name-data="{ row }">
-              <UInput v-model="row.name" />
-            </template>
-            <template #type-data="{ row }">
-              <UInput v-model="row.type" type="number" />
-            </template>
-            <template #sort-data="{ row }">
-              <UInput v-model="row.sort" type="number" />
-            </template>
-            <template #unit-data="{ row }">
-              <UInput v-model="row.unit" />
-            </template>
-            <template #ref-data="{ row }">
-              <UInput v-model="row.ref" type="number" />
-            </template>
-            <template #src-data="{ row }">
-              <UInput v-model="row.src" />
-            </template>
-            <template #params-data="{ row }">
-              <UInput v-model="row.params" />
-            </template>
-            <template #actions-data="{ row }">
-              <UButton :label="row.index" />
-            </template>
-          </UTable>
-        </UCard>
-      </div>
-    </div>
-    <!-- <div>
+  </div>
+  <!-- <div>
         <span text-xl fw-600 text-green>Line</span>
         <button i-carbon:add-filled bg-lime pl-10 @click="addData" />
         <div v-for="(item, index) of data.line[0].series" :key="index" grid="~ cols-[1fr_1fr_2fr_2fr_2fr_4fr_5fr_20fr] gap-1" p-1>
@@ -179,5 +171,4 @@ function testSqlConn() {
           </div>
         </div>
       </div> -->
-  </div>
 </template>

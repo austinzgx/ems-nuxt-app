@@ -36,7 +36,7 @@ export interface Param {
 }
 
 export const useSystemStore = defineStore('system', () => {
-  const host = ref<string>('localhost') // ('10.198.74.241') //
+  const host = ref<string>('localhost') // ('10.198.74.241')
   const port = ref<number>(5432)
   const admin_password = ref('pims#1234')
   const config = ref<Config[]>()
@@ -49,7 +49,13 @@ export const useSystemStore = defineStore('system', () => {
     system.value = data.system
     return data
   }
-
+  async function fetchData(name: string) {
+    const data = await $fetch<ConfigData[]>(`${url}/api/data`, {
+      method: 'POST',
+      body: { name },
+    })
+    return data
+  }
   function addData(formData: any) {
     config.value!.push(formData)
   }
@@ -58,7 +64,7 @@ export const useSystemStore = defineStore('system', () => {
   }
 
   async function saveData() {
-    await $fetch(url, {
+    await $fetch(`${url}/api/config`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -71,29 +77,45 @@ export const useSystemStore = defineStore('system', () => {
   }
 
   async function getMatric(config: ConfigData) {
-    const data = await $fetch(`${url}/api/sp`, {
+    const { data, error } = await useFetch(`${url}/api/sp`, {
       method: 'POST',
-      body: config.params,
+      body: { ...config.params, type: config.type },
     })
-    if (!data) {
-      const mock_data = [[5, 100], [6, 200]]
+    if (error.value) {
+      const mock_data = [
+        [4, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1232000', null, '无'],
+        [5, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1532000', null, '无'],
+      ]
       return mock_data
     }
-    return data
+    else {
+      return data.value
+    }
   }
-  async function changeMatricSize(config: ConfigData, type: string) {
-    const data = await $fetch(`${url}/api/sp`, {
+
+  async function changeMatricSize(config: ConfigData, size: string) {
+    const { data, error } = await useFetch<[any]>(`${url}/api/sp`, {
       method: 'POST',
       body: {
         ...config.params,
-        size: type,
+        size,
+        type: config.type,
+        period: size,
       },
     })
-    if (!data) {
-      const mock_data = [['5/30', '220'], ['5/31', '100'], ['6/1', '200']]
-      return mock_data
+    if (error.value) {
+      const mock_data = [
+        [4, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1232000', null, '无'],
+        [5, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1132000', null, '无'],
+        [6, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1432000', null, '无'],
+        [7, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1232000', null, '无'],
+        [8, 0, 'Tue, 04 Jun 2024 08:00:00 GMT', '1332000', null, '无'],
+      ]
+      return mock_data as [any]
     }
-    return data
+    else {
+      return data.value
+    }
   }
 
   return {
@@ -103,6 +125,7 @@ export const useSystemStore = defineStore('system', () => {
     system,
     admin_password,
     fetchConf,
+    fetchData,
     addData,
     saveData,
     removeData,
